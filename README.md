@@ -1,14 +1,14 @@
-#Sistema de Biblioteca e Salas de Estudo
+# Sistema de Biblioteca e Salas de Estudo
 
 Sistema web completo para gerenciamento de empréstimos de livros, reservas de salas de estudo e painel administrativo.
 
-##Descrição do Projeto - 
+## Descrição do Projeto - 
 
 Este sistema simula o funcionamento de uma biblioteca acadêmica real, permitindo que alunos consultem livros, realizem reservas e acompanhem empréstimos. Funcionários possuem acesso a um painel administrativo completo para gerenciar livros, usuários, reservas e salas de estudo.
 
 O projeto é dividido em frontend estático (HTML, CSS e JavaScript) e backend Django REST Framework utilizando banco SQLite.
 
-##O sistema possui:
+## O sistema possui:
 - Interface moderna e intuitiva
 - Login via matrícula e senha
 - Permissões separadas (aluno e funcionário)
@@ -18,22 +18,22 @@ O projeto é dividido em frontend estático (HTML, CSS e JavaScript) e backend D
 - Painel administrativo completo
 - Scripts automáticos para criar dados de teste
 
-##Tecnologias e Versões Utilizadas - 
+## Tecnologias e Versões Utilizadas - 
 
-###Backend:
+### Backend:
 - Python 3.11.9
 - Django 5.2.8
 - SQLite 3.45.1
 
 Django CORS Headers (para permitir comunicação com o frontend)
 
-###Frontend:
+### Frontend:
 - HTML5
 - CSS3
 - JavaScript ES6
 - Vue.js 3.x (CDN — última versão estável)
 
-##Como Rodar o Projeto Localmente:
+## Como Rodar o Projeto Localmente:
 
 1. Navegue até a pasta backend
     - cd backend
@@ -58,14 +58,14 @@ Django CORS Headers (para permitir comunicação com o frontend)
 7. Abrir o frontend
     - Basta abrir os arquivos HTML diretamente no navegador.
 
-##Populando o Banco com Dados de Teste - 
+## Populando o Banco com Dados de Teste - 
 
 O script dados_teste.py cria automaticamente:
 - 5 usuários (3 alunos + 2 funcionários)
 - 10 livros reais
 - 6 salas de estudo
 
-##Para executar o script:
+## Para executar o script:
 
 1º Certifique-se de estar na pasta backend  
 
