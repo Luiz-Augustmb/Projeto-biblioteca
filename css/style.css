@@ -1,0 +1,620 @@
+/* ==========================
+   RESET / GERAL
+========================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body {
+    background: #f4f4f5;
+    color: #111827;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    width: 90%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.conteudo {
+    flex: 1;
+    padding: 20px 0 40px 0;
+}
+
+/* ==========================
+   HEADER
+========================== */
+
+.topo {
+    background: #1e3a8a;
+    padding: 14px 0;
+    color: white;
+}
+
+.topo-conteudo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.menu {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+}
+
+.menu-link {
+    color: white;
+    text-decoration: none;
+    font-size: 0.95rem;
+}
+
+.menu-link:hover {
+    text-decoration: underline;
+}
+
+.menu-link-ativo {
+    font-weight: bold;
+    text-decoration: underline;
+}
+
+.menu-saudacao {
+    font-size: 0.9rem;
+    margin-right: 10px;
+}
+
+.botao-login {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid white;
+}
+
+/* ==========================
+   FOOTER
+========================== */
+
+.rodape {
+    background: #1e3a8a;
+    color: white;
+    padding: 12px 0;
+    text-align: center;
+    margin-top: auto;
+}
+
+/* ==========================
+   TEXTOS / TÍTULOS
+========================== */
+
+.cabecalho-pagina {
+    margin-bottom: 10px;
+}
+
+.titulo-pagina {
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin-bottom: 4px;
+}
+
+.subtitulo-pagina {
+    font-size: 0.95rem;
+    color: #4b5563;
+}
+
+/* ==========================
+   BOTÕES
+========================== */
+
+.botao {
+    border: none;
+    cursor: pointer;
+    padding: 8px 14px;
+    border-radius: 6px;
+    transition: 0.2s;
+    font-size: 0.9rem;
+}
+
+.botao-principal {
+    background: #2563eb;
+    color: white;
+}
+
+.botao-principal:hover {
+    background: #1d4ed8;
+}
+
+.botao-secundario {
+    background: #475569;
+    color: white;
+}
+
+.botao-secundario:hover {
+    background: #374151;
+}
+
+.botao-desabilitado {
+    background: #e5e7eb !important;
+    color: #6b7280 !important;
+    cursor: not-allowed !important;
+}
+
+/* ==========================
+   INPUTS
+========================== */
+
+.form-input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 0.9rem;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #2563eb;
+}
+
+/* ==========================
+   BUSCA
+========================== */
+
+.secao-busca {
+    margin: 10px 0 16px 0;
+}
+
+.busca-input {
+    max-width: 400px;
+    background: white;
+}
+
+/* ==========================
+   GRID DE LIVROS
+========================== */
+
+.livros-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 4px;
+}
+
+.livro-card {
+    background: white;
+    padding: 16px 18px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.livro-card-cabecalho {
+    margin-bottom: 6px;
+}
+
+.livro-titulo {
+    font-size: 1rem;
+    font-weight: bold;
+}
+
+.livro-autor {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.livro-categoria,
+.livro-codigo,
+.livro-quantidade {
+    font-size: 0.85rem;
+    color: #4b5563;
+    margin-top: 6px;
+}
+
+.texto-indisponivel {
+    color: #b91c1c;
+    font-weight: bold;
+}
+
+.livro-botao-reservar {
+    margin-top: 14px;
+}
+
+/* ==========================
+   PÁGINA INICIAL (index)
+========================== */
+
+.inicio-hero {
+    background: white;
+    padding: 18px 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+    margin-bottom: 18px;
+}
+
+.inicio-hero-botoes {
+    margin-top: 12px;
+    display: flex;
+    gap: 10px;
+}
+
+.inicio-atalhos-titulo {
+    font-size: 1.05rem;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.atalhos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 14px;
+    margin-top: 6px;
+}
+
+.atalho-card {
+    background: white;
+    padding: 14px 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.atalho-card h3 {
+    font-size: 0.95rem;
+    margin-bottom: 4px;
+}
+
+.atalho-card p {
+    font-size: 0.85rem;
+    color: #4b5563;
+    margin-bottom: 10px;
+}
+
+/* ==========================
+   MENSAGENS
+========================== */
+
+.admin-mensagem-sucesso {
+    background: #d1fae5;
+    color: #065f46;
+    padding: 10px;
+    border-radius: 6px;
+    border-left: 4px solid #10b981;
+}
+
+.admin-mensagem-erro {
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 10px;
+    border-radius: 6px;
+    border-left: 4px solid #ef4444;
+}
+
+/* ==========================
+   MODAL (POP-UP BONITO)
+========================== */
+
+.modal-fundo {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: flex;              /* o display inicial é sobrescrito pelo inline style="display:none" */
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+}
+
+.modal-caixa {
+    background: white;
+    width: 90%;
+    max-width: 420px;
+    padding: 24px 26px;
+    border-radius: 14px;
+    text-align: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    animation: popupShow 0.25s ease-out;
+}
+
+@keyframes popupShow {
+    from { opacity: 0; transform: scale(0.88); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.modal-caixa-sucesso {
+    padding-top: 30px;
+}
+
+.modal-icone-sucesso {
+    width: 68px;
+    height: 68px;
+    background: #10b981;
+    color: white;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 34px;
+    margin: 0 auto 14px auto;
+}
+
+.modal-titulo {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.modal-botoes {
+    margin-top: 18px;
+}
+
+/* ==========================
+   ADMIN (painel)
+========================== */
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+}
+
+.admin-card {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.admin-card h3 {
+   text-align: center;
+}
+.admin-botao-cheio {
+    width: 100%;
+    margin-top: 12px;
+}
+
+/* ==========================
+   SALAS DE ESTUDO (admin)
+========================== */
+
+.salas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.sala-card {
+    background: white;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.08);
+    font-size: 0.9rem;
+}
+
+.sala-livre {
+    background: #ecfdf5;
+    border-color: #86efac;
+}
+
+.sala-ocupada {
+    background: #fef2f2;
+    border-color: #fecaca;
+}
+
+.sala-topo {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.sala-titulo {
+    font-weight: bold;
+}
+
+.sala-horario {
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.sala-status-livre {
+    color: #15803d;
+    font-size: 0.85rem;
+}
+
+.sala-status-ocupada {
+    color: #b91c1c;
+    font-size: 0.85rem;
+}
+
+.sala-atraso {
+    color: #b91c1c !important;
+    font-weight: bold;
+}
+
+/* ==========================
+   PÁGINA "MEUS EMPRÉSTIMOS"
+========================== */
+
+.emprestimo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 5px solid #2563eb;
+}
+
+.emprestimo-item-atrasado {
+    border-left-color: #b91c1c !important;
+    background: #fef2f2;
+}
+
+.emprestimo-detalhes {
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+
+/* ==========================
+   PÁGINA "MINHAS RESERVAS"
+========================== */
+
+.reserva-item {
+    background: white;
+    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border-left: 5px solid #1e40af;
+}
+
+.reserva-status {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: #475569;
+}
+
+.reserva-atraso {
+    color: #b91c1c;
+    font-weight: bold;
+}
+
+/* ==========================
+   LOGIN
+========================== */
+
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 32px 16px 40px 16px;
+}
+
+.login-grid {
+    width: 100%;
+    max-width: 980px;
+    background: linear-gradient(135deg, #eff6ff 0%, #e0f2fe 40%, #ffffff 100%);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.15);
+    padding: 28px 30px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: 32px;
+}
+
+/* Lado esquerdo (texto) */
+
+.login-side {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+
+.login-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #111827;
+}
+
+.login-text {
+    font-size: 0.95rem;
+    color: #374151;
+    margin-bottom: 14px;
+}
+
+.login-features {
+    list-style: none;
+    font-size: 0.9rem;
+    color: #1f2937;
+    margin-bottom: 16px;
+}
+
+.login-features li + li {
+    margin-top: 4px;
+}
+
+
+/* Card de login (lado direito) */
+
+.login-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 22px 24px 24px 24px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+    border: 1px solid #e5e7eb;
+}
+
+.login-card-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: #111827;
+}
+
+.login-card-subtitle {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 14px;
+}
+
+.login-form {
+    margin-top: 4px;
+}
+
+.login-group {
+    margin-bottom: 12px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #374151;
+}
+
+.login-submit {
+    width: 100%;
+    margin-top: 6px;
+}
+
+.login-hint {
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: #6b7280;
+    text-align: center;
+}
+
+/* Responsivo */
+
+@media (max-width: 900px) {
+    .login-grid {
+        grid-template-columns: 1fr;
+        padding: 22px 20px;
+    }
+
+    .login-page {
+        padding-top: 24px;
+    }
+}
+
+@media (max-width: 600px) {
+    .login-card {
+        padding: 18px 16px 20px 16px;
+    }
+
+    .login-title {
+        font-size: 1.25rem;
+    }
+}
+

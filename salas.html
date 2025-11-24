@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca - Salas de Estudo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topo">
+    <div class="container topo-conteudo">
+        <h1 class="logo">Biblioteca</h1>
+        <nav class="menu">
+            <a href="index.html" class="menu-link">Início</a>
+            <a href="livros.html" class="menu-link">Livros</a>
+            <a href="meus-emprestimos.html" class="menu-link">Meus empréstimos</a>
+            <a href="salas.html" class="menu-link menu-link-ativo">Salas</a>
+            <a href="minhas-reservas.html" class="menu-link">Minhas reservas</a>
+
+            <span id="saudacao-usuario" class="menu-saudacao"></span>
+            <a href="login.html" class="menu-link botao-login" id="link-entrar">Entrar</a>
+            <a href="#" class="menu-link botao-login" id="link-sair" style="display:none;" onclick="sair()">Sair</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container conteudo" id="app">
+
+    <section class="cabecalho-pagina">
+        <h2 class="titulo-pagina">Salas de estudo</h2>
+        <p class="subtitulo-pagina">
+            Estas são as salas disponíveis para reserva na biblioteca. Cada reserva é válida por 1 hora.
+        </p>
+    </section>
+
+    <!-- Mensagens -->
+    <p v-if="carregando" style="margin-top: 8px; font-size: 0.95rem; color:#4b5563;">
+        Carregando salas...
+    </p>
+
+    <p v-if="erro" class="admin-mensagem-erro" style="margin-top: 8px;">
+        {{ erro }}
+    </p>
+
+    <!-- disposiçaõ das salas na tela -->
+    <section
+        v-if="!carregando && salasFiltradas.length"
+        class="salas-grid"
+        style="margin-top: 16px;"
+    >
+        <article
+            v-for="sala in salasFiltradas"
+            :key="sala.id"
+            :class="['sala-card', sala.ocupada ? 'sala-ocupada' : 'sala-livre']"
+        >
+            <div class="sala-topo">
+                <span class="sala-titulo">{{ sala.nome }}</span>
+                <span
+                    :class="sala.ocupada ? 'sala-status-ocupada' : 'sala-status-livre'"
+                >
+                    <template v-if="sala.ocupada">
+                        <template v-if="sala.atrasada">Em atraso</template>
+                        <template v-else>Ocupada</template>
+                    </template>
+                    <template v-else>Sala disponível</template>
+                </span>
+            </div>
+
+            <!-- informações da sala -->
+
+            <button
+                class="botao sala-botao-reservar"
+                :class="{
+                    'botao-principal': podeReservar(sala),
+                    'botao-desabilitado': !podeReservar(sala) || reservandoId === sala.id
+                }"
+                :disabled="!podeReservar(sala) || reservandoId === sala.id"
+                @click="reservarSala(sala)"
+            >
+                
+                <span v-else>
+                    {{ sala.ocupada ? 'Indisponível' : 'Reservar' }}
+                </span>
+            </button>
+        </article>
+    </section>
+
+    <p
+        v-if="!carregando && !salasFiltradas.length && !erro"
+        style="margin-top: 16px; text-align:center;"
+    >
+        Nenhuma sala encontrada.
+    </p>
+
+    <!-- POP-UP de confirmação -->
+    <div class="modal-fundo" v-if="mostrarPopup">
+        <div class="modal-caixa">
+            <h3 class="modal-titulo">Reserva realizada!</h3>
+            <p class="modal-subtitulo">
+                {{ popupMensagem }}
+            </p>
+
+            <div class="modal-botoes" style="margin-top: 16px;">
+                <button class="botao botao-principal" @click="fecharPopup">
+                    Ok
+                </button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer class="rodape">
+    <div class="container">
+        <p>2025 - Sistema de Biblioteca e Salas de Estudo</p>
+    </div>
+</footer>
+
+<!-- Vue 3 -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            salas: [],              
+            termoBusca: '',
+            carregando: false,
+            erro: '',
+            reservandoId: null,
+
+            mostrarPopup: false,
+            popupMensagem: ''
+        };
+    },
+    computed: {
+        salasFiltradas() {
+            const termo = this.termoBusca.trim().toLowerCase();
+            if (!termo) return this.salas;
+
+            return this.salas.filter(sala => {
+                const nome  = (sala.nome || '').toLowerCase();
+                return nome.includes(termo);
+            });
+        }
+    },
+    methods: {
+        async carregarSalas() {
+            this.carregando = true;
+            this.erro = '';
+
+            try {
+                // informação da sala (ocupada / livre, aluno, horário)
+                const respStatus = await fetch('http://127.0.0.1:8000/api/status-salas/');
+                if (!respStatus.ok) {
+                    throw new Error('Não foi possível carregar o status das salas.');
+                }
+                const dadosStatusBruto = await respStatus.json();
+                const dadosStatus = Array.isArray(dadosStatusBruto)
+                    ? dadosStatusBruto
+                    : (dadosStatusBruto.results || []);
+
+                const respInfos = await fetch('http://127.0.0.1:8000/api/salas-estudo/');
+                if (!respInfos.ok) {
+                    throw new Error('Não foi possível carregar os dados das salas.');
+                }
+                const dadosInfosBruto = await respInfos.json();
+                const dadosInfos = Array.isArray(dadosInfosBruto)
+                    ? dadosInfosBruto
+                    : (dadosInfosBruto.results || []);
+
+                const mapaInfos = {};
+                dadosInfos.forEach(s => {
+                    mapaInfos[s.id] = s;
+                });
+
+                this.salas = dadosStatus.map(s => {
+                    const info = mapaInfos[s.id] || {};
+                    return {
+                        ...s,
+                        capacidade: info.capacidade || null,
+                        localizacao: info.localizacao || ''
+                    };
+                });
+
+            } catch (err) {
+                console.error(err);
+                this.erro = err.message || 'Erro ao carregar salas.';
+            } finally {
+                this.carregando = false;
+            }
+        },
+
+        podeReservar(sala) {
+            return !sala.ocupada;
+        },
+
+        async reservarSala(sala) {
+            if (!this.podeReservar(sala)) return;
+
+            const dadosUsuario = localStorage.getItem('usuarioLogado');
+            if (!dadosUsuario) {
+                alert('Você precisa estar logado para reservar uma sala.');
+                return;
+            }
+            const usuario = JSON.parse(dadosUsuario);
+
+            this.reservandoId = sala.id;
+            this.erro = '';
+
+            try {
+                const inicio = new Date();
+                const fim = new Date(inicio);
+                fim.setHours(fim.getHours() + 1);
+
+                const resp = await fetch('http://127.0.0.1:8000/api/reservas-salas/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        usuario: usuario.id,
+                        sala: sala.id,
+                        inicio: inicio.toISOString(),
+                        fim: fim.toISOString()
+                    })
+                });
+
+                if (!resp.ok) {
+                    const errData = await resp.json().catch(() => ({}));
+                    throw new Error(errData.detail || 'Erro ao registrar reserva da sala.');
+                }
+
+                this.popupMensagem = `Sala ${sala.nome} reservada com sucesso por 1 hora. ` +
+                    `Apresente-se na biblioteca para utilizar a sala.`;
+                this.mostrarPopup = true;
+
+                await this.carregarSalas();
+
+            } catch (err) {
+                console.error(err);
+                this.erro = err.message || 'Erro ao reservar sala.';
+            } finally {
+                this.reservandoId = null;
+            }
+        },
+
+        fecharPopup() {
+            this.mostrarPopup = false;
+        }
+    },
+    mounted() {
+        this.carregarSalas();
+    }
+}).mount('#app');
+</script>
+
+<!-- Bem vindo *usuário* -->
+<script>
+function atualizarSaudacao() {
+    const spanSaudacao = document.getElementById('saudacao-usuario');
+    const linkEntrar   = document.getElementById('link-entrar');
+    const linkSair     = document.getElementById('link-sair');
+
+    const dados = localStorage.getItem('usuarioLogado');
+
+    if (dados) {
+        const usuario = JSON.parse(dados);
+        if (spanSaudacao) {
+            spanSaudacao.textContent = 'Bem-vindo, ' + (usuario.nome || usuario.matricula) + '!';
+        }
+        if (linkEntrar) linkEntrar.style.display = 'none';
+        if (linkSair)   linkSair.style.display   = 'inline-block';
+    } else {
+        if (spanSaudacao) spanSaudacao.textContent = '';
+        if (linkEntrar)   linkEntrar.style.display = 'inline-block';
+        if (linkSair)     linkSair.style.display   = 'none';
+    }
+}
+
+function sair() {
+    localStorage.removeItem('usuarioLogado');
+    atualizarSaudacao();
+    window.location.href = 'login.html';
+}
+
+atualizarSaudacao();
+</script>
+
+</body>
+</html>

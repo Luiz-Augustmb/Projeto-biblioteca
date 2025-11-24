@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Entrar no sistema</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topo">
+    <div class="container topo-conteudo">
+        <h1 class="logo">Biblioteca</h1>
+
+        <nav class="menu">
+            <a href="index.html" class="menu-link">Início</a>
+            <a href="livros.html" class="menu-link">Livros</a>
+            <a href="meus-emprestimos.html" class="menu-link">Meus empréstimos</a>
+            <a href="salas.html" class="menu-link">Salas</a>
+            <a href="minhas-reservas.html" class="menu-link">Minhas reservas</a>
+            <span id="saudacao-usuario" class="menu-saudacao"></span>
+            <a href="login.html" class="menu-link botao-login" id="link-entrar">Entrar</a>
+            <a href="#" class="menu-link botao-login" id="link-sair" style="display:none;" onclick="sair()">Sair</a>
+        </nav>
+    </div>
+</header>
+
+<main class="conteudo">
+    <section class="login-page">
+        <div class="login-grid">
+
+            <!-- Lado esquerdo -->
+            <div class="login-side">
+                <h2 class="login-title">Bem-vindo(a) à biblioteca digital</h2>
+                <p class="login-text">
+                    Acesse com a sua <strong>matrícula</strong> para reservar livros,
+                    controlar seus empréstimos e gerenciar salas de estudo.
+                </p>
+
+                <ul class="login-features">
+                    <li>- Catálogo atualizado de livros</li>
+                    <li>- Reserva rápida de salas de estudo</li>
+                    <li>- Acompanhamento de prazos e histórico</li>
+                </ul>
+            </div>
+
+            <!-- Lado direito: card de login -->
+            <div class="login-card">
+                <h3 class="login-card-title">Entrar no sistema</h3>
+                <p class="login-card-subtitle">
+                    Informe sua matrícula e senha.
+                </p>
+
+                <!-- Mensagem de erro -->
+                <p id="login-mensagem" class="admin-mensagem-erro" style="display:none; margin-bottom: 10px;"></p>
+
+                <form id="form-login" class="login-form">
+                    <div class="login-group">
+                        <label for="campo-matricula" class="form-label">Matrícula</label>
+                        <input
+                            type="text"
+                            id="campo-matricula"
+                            class="form-input"
+                            placeholder="Ex: 1001"
+                            required
+                        >
+                    </div>
+
+                    <div class="login-group">
+                        <label for="campo-senha" class="form-label">Senha</label>
+                        <input
+                            type="password"
+                            id="campo-senha"
+                            class="form-input"
+                            placeholder="Digite sua senha"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="botao botao-principal login-submit">
+                        Entrar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="rodape">
+    <div class="container">
+        <p>2025 - Sistema de Biblioteca e Salas de Estudo</p>
+    </div>
+</footer>
+
+<script>
+const API_LOGIN = 'http://127.0.0.1:8000/api/login/';
+
+/* ========= HEADER / SESSÃO ========= */
+
+function atualizarSaudacao() {
+    const spanSaudacao = document.getElementById('saudacao-usuario');
+    const linkEntrar   = document.getElementById('link-entrar');
+    const linkSair     = document.getElementById('link-sair');
+
+    const dados = localStorage.getItem('usuarioLogado');
+
+    if (dados) {
+        const usuario = JSON.parse(dados);
+        if (spanSaudacao) {
+            spanSaudacao.textContent = 'Bem-vindo, ' + (usuario.nome || usuario.matricula) + '!';
+        }
+        if (linkEntrar) linkEntrar.style.display = 'none';
+        if (linkSair)   linkSair.style.display   = 'inline-block';
+    } else {
+        if (spanSaudacao) spanSaudacao.textContent = '';
+        if (linkEntrar)   linkEntrar.style.display = 'inline-block';
+        if (linkSair)     linkSair.style.display   = 'none';
+    }
+}
+
+function sair() {
+    localStorage.removeItem('usuarioLogado');
+    atualizarSaudacao();
+    window.location.href = 'login.html';
+}
+
+atualizarSaudacao();
+
+/* ========= LOGIN ========= */
+
+document.getElementById('form-login').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const msgEl = document.getElementById('login-mensagem');
+    msgEl.style.display = 'none';
+    msgEl.textContent = '';
+
+    const matricula = document.getElementById('campo-matricula').value.trim();
+    const senha     = document.getElementById('campo-senha').value;
+
+    if (!matricula || !senha) {
+        msgEl.textContent = 'Informe matrícula e senha.';
+        msgEl.style.display = 'block';
+        return;
+    }
+
+    try {
+        const resp = await fetch(API_LOGIN, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ matricula, senha })
+        });
+
+        const dados = await resp.json().catch(() => ({}));
+
+        if (!resp.ok) {
+            msgEl.textContent = dados.detail || 'Matrícula ou senha inválidas.';
+            msgEl.style.display = 'block';
+            return;
+        }
+
+        // dados: {id, matricula, nome, is_staff, is_superuser}
+        localStorage.setItem('usuarioLogado', JSON.stringify(dados));
+
+        // Redireciona: se funcionário/admin, vai pro painel; senão, para a área de usuário
+        if (dados.is_staff || dados.is_superuser) {
+            window.location.href = 'painel_admin.html';
+        } else {
+            window.location.href = 'index.html';
+        }
+
+    } catch (err) {
+        console.error(err);
+        msgEl.textContent = 'Erro ao tentar fazer login.';
+        msgEl.style.display = 'block';
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Livros da Biblioteca</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Vue 3 -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+
+<header class="topo">
+    <div class="container topo-conteudo">
+        <h1 class="logo">Biblioteca</h1>
+
+        <nav class="menu">
+            <a href="index.html" class="menu-link">Início</a>
+            <a href="livros.html" class="menu-link menu-link-ativo">Livros</a>
+            <a href="meus-emprestimos.html" class="menu-link">Meus empréstimos</a>
+            <a href="salas.html" class="menu-link">Salas</a>
+            <a href="minhas-reservas.html" class="menu-link">Minhas reservas</a>
+
+            <span id="saudacao-usuario" class="menu-saudacao"></span>
+            <a href="login.html" class="menu-link botao-login" id="link-entrar">Entrar</a>
+            <a href="#" class="menu-link botao-login" id="link-sair" style="display:none;" onclick="sair()">Sair</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container conteudo" id="app">
+
+    <!-- Cabeçalho da página -->
+    <section class="cabecalho-pagina">
+        <h2 class="titulo-pagina">Livros da biblioteca</h2>
+        <p class="subtitulo-pagina">
+            Confira o catálogo de livros disponíveis para empréstimo e faça sua reserva.
+        </p>
+    </section>
+
+    <!-- Busaca -->
+    <section class="secao-busca" style="margin-bottom: 12px;">
+        <input
+            type="text"
+            class="form-input busca-input"
+            placeholder="Buscar por título ou autor..."
+            v-model="busca"
+        >
+    </section>
+
+    <!-- Mensagens gerais -->
+    <p v-if="erro" class="admin-mensagem-erro" style="margin-bottom: 8px;">
+        {{ erro }}
+    </p>
+
+    <!-- Lista de livros -->
+    <section v-if="carregando" style="margin-top: 16px; font-size: 0.95rem; color:#4b5563;">
+        Carregando livros...
+    </section>
+
+    <section v-else class="livros-grid">
+        <article
+            v-for="livro in livrosFiltrados"
+            :key="livro.id"
+            class="livro-card"
+        >
+            <div class="livro-card-cabecalho">
+                <h3 class="livro-titulo">{{ livro.titulo }}</h3>
+                <p class="livro-autor">por {{ livro.autor }}</p>
+            </div>
+
+            <p class="livro-categoria" v-if="livro.categoria">
+                Categoria: <strong>{{ livro.categoria }}</strong>
+            </p>
+
+            <p class="livro-codigo">
+                Código interno: <strong>{{ livro.codigo }}</strong>
+            </p>
+
+            <p class="livro-quantidade">
+                <span v-if="livro.quantidade_disponivel > 0">
+                    Disponíveis: <strong>{{ livro.quantidade_disponivel }}</strong>
+                </span>
+                <span v-else class="texto-indisponivel">
+                    Indisponível
+                </span>
+            </p>
+
+            <button
+                class="botao livro-botao-reservar"
+                :class="{
+                    'botao-principal': podeReservar(livro),
+                    'botao-desabilitado': !podeReservar(livro) || reservandoId === livro.id
+                }"
+                :disabled="!podeReservar(livro) || reservandoId === livro.id"
+                @click="reservarLivro(livro)"
+            >
+                <span v-if="reservandoId === livro.id">Reservando...</span>
+                <span v-else>Reservar</span>
+            </button>
+        </article>
+
+        <p
+            v-if="!livrosFiltrados.length && !carregando"
+            style="grid-column:1/-1; text-align:center; margin-top:16px;"
+        >
+            Nenhum livro encontrado com esse filtro.
+        </p>
+    </section>
+
+    <!-- POP-UP de confirmação -->
+    <div class="modal-fundo" v-if="mostrarPopup">
+        <div class="modal-caixa">
+            <h3 class="modal-titulo">Reserva realizada!</h3>
+            <p class="modal-subtitulo">
+                Retire o livro na biblioteca.
+            </p>
+
+            <div class="modal-botoes" style="margin-top: 16px;">
+                <button class="botao botao-principal" @click="fecharPopup">
+                    Ok
+                </button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer class="rodape">
+    <div class="container">
+        <p>2025 - Sistema de Biblioteca e Salas de Estudo</p>
+    </div>
+</footer>
+
+<script>
+    const { createApp } = Vue;
+
+    createApp({
+        data() {
+            return {
+                livros: [],
+                carregando: true,
+                erro: '',
+                busca: '',
+                reservandoId: null,
+                mostrarPopup: false
+            };
+        },
+        computed: {
+            livrosFiltrados() {
+                const termo = this.busca.trim().toLowerCase();
+                if (!termo) return this.livros;
+
+                return this.livros.filter(l => {
+                    const titulo = (l.titulo || '').toLowerCase();
+                    const autor  = (l.autor  || '').toLowerCase();
+                    return titulo.includes(termo) || autor.includes(termo);
+                });
+            }
+        },
+        methods: {
+            carregarLivros() {
+                this.carregando = true;
+                this.erro = '';
+
+                fetch('http://127.0.0.1:8000/api/livros/')
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Não foi possível carregar os livros.');
+                        }
+                        return res.json();
+                    })
+                    .then(dados => {
+                        this.livros = Array.isArray(dados) ? dados : (dados.results || []);
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        this.erro = err.message || 'Erro ao carregar livros.';
+                    })
+                    .finally(() => {
+                        this.carregando = false;
+                    });
+            },
+            podeReservar(livro) {
+                return (livro.quantidade_disponivel || 0) > 0;
+            },
+            reservarLivro(livro) {
+                this.erro = '';
+
+                if (!this.podeReservar(livro)) {
+                    return;
+                }
+
+                // Recupera usuário logado do localStorage
+                const dadosUsuario = localStorage.getItem('usuarioLogado');
+                if (!dadosUsuario) {
+                    alert('Você precisa estar logado para reservar um livro.');
+                    return;
+                }
+
+                const usuario = JSON.parse(dadosUsuario);
+
+                this.reservandoId = livro.id;
+
+                fetch('http://127.0.0.1:8000/api/emprestimos/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        usuario: usuario.id,
+                        livro: livro.id
+                    })
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        return res.json().then(err => {
+                            throw new Error(err.detail || 'Erro ao reservar livro.');
+                        });
+                    }
+                    return res.json();
+                })
+                .then(() => {
+                    // Atualiza quantidade disponível
+                    if (livro.quantidade_disponivel > 0) {
+                        livro.quantidade_disponivel -= 1;
+                    }
+                    // Abre o pop-up e deixa ele aberto até o usuário clicar em "Ok"
+                    this.mostrarPopup = true;
+                })
+                .catch(err => {
+                    console.error(err);
+                    this.erro = err.message || 'Erro ao reservar livro.';
+                })
+                .finally(() => {
+                    this.reservandoId = null;
+                });
+            },
+            fecharPopup() {
+                this.mostrarPopup = false;
+            }
+        },
+        mounted() {
+            this.carregarLivros();
+        }
+    }).mount('#app');
+
+    // header e funções comuns
+    function atualizarSaudacao() {
+        const spanSaudacao = document.getElementById('saudacao-usuario');
+        const linkEntrar   = document.getElementById('link-entrar');
+        const linkSair     = document.getElementById('link-sair');
+
+        const dados = localStorage.getItem('usuarioLogado');
+
+        if (dados) {
+            const usuario = JSON.parse(dados);
+            if (spanSaudacao) {
+                spanSaudacao.textContent = 'Bem-vindo, ' + (usuario.nome || usuario.matricula) + '!';
+            }
+            if (linkEntrar) linkEntrar.style.display = 'none';
+            if (linkSair)   linkSair.style.display   = 'inline-block';
+        } else {
+            if (spanSaudacao) spanSaudacao.textContent = '';
+            if (linkEntrar)   linkEntrar.style.display = 'inline-block';
+            if (linkSair)     linkSair.style.display   = 'none';
+        }
+    }
+
+    function sair() {
+        localStorage.removeItem('usuarioLogado');
+        atualizarSaudacao();
+        window.location.href = 'login.html';
+    }
+
+    atualizarSaudacao();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+# Ignore venv
+venv/
+.env/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Ignore SQLite DB
+*.sqlite3
+
+# Django things
+*.log
+*.pot
+*.pyc
+*.pyo
+*.po
+*.db
+
+# Ignore static compiled files (optional)
+staticfiles/
+
+# Ignore compiled migrations
+*.pyc
+__pycache__/
+
+# VS Code
+.vscode/
+
+# System files
+.DS_Store
+Thumbs.db

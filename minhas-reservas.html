@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca - Minhas reservas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topo">
+    <div class="container topo-conteudo">
+        <h1 class="logo">Biblioteca</h1>
+
+        <nav class="menu">
+            <a href="index.html" class="menu-link">Início</a>
+            <a href="livros.html" class="menu-link">Livros</a>
+            <a href="meus-emprestimos.html" class="menu-link">Meus empréstimos</a>
+            <a href="salas.html" class="menu-link">Salas</a>
+            <a href="minhas-reservas.html" class="menu-link menu-link-ativo">Minhas reservas</a>
+
+            <span id="saudacao-usuario" class="menu-saudacao"></span>
+            <a href="login.html" class="menu-link botao-login" id="link-entrar">Entrar</a>
+            <a href="#" class="menu-link botao-login" id="link-sair" style="display:none;" onclick="sair()">Sair</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container conteudo" id="app">
+
+    <section class="cabecalho-pagina" style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;">
+        <div>
+            <h2 class="titulo-pagina">Minhas reservas de sala</h2>
+            <p class="subtitulo-pagina">
+                Aqui você vê suas reservas de salas de estudo ativas. Você pode cancelar uma reserva se precisar.
+            </p>
+        </div>
+
+        <div>
+            <button class="botao botao-secundario botao-pequeno" @click="abrirHistorico">Ver histórico de reservas</button>
+        </div>
+    </section>
+
+    <!-- mensagens -->
+    <p v-if="carregando" style="margin-top: 8px; font-size: 0.95rem; color:#4b5563;">
+        Carregando reservas...
+    </p>
+
+    <p v-if="erro" class="admin-mensagem-erro" style="margin-top: 8px;">
+        {{ erro }}
+    </p>
+
+    <!-- Lista de reservas ATIVAS -->
+    <section v-if="!carregando && reservas.length" style="margin-top: 16px;">
+        <article
+            v-for="reserva in reservasOrdenadas"
+            :key="reserva.id"
+            class="reserva-item"
+            :class="{'emprestimo-item-atrasado': reserva.atrasada}"
+        >
+            <div style="display:flex; justify-content:space-between; gap:16px;">
+                <!-- Informações da reserva  -->
+                <div>
+                    <h3 class="livro-titulo">
+                        {{ reserva.sala_nome || ('Sala ' + reserva.sala) }}
+                    </h3>
+
+                    <div class="emprestimo-detalhes">
+                        <div><strong>Início:</strong> {{ formatarDataHora(reserva.inicio) }}</div>
+                        <div><strong>Fim:</strong> {{ formatarDataHora(reserva.fim) }}</div>
+                    </div>
+
+                    <p
+                        class="reserva-status"
+                        :class="{'reserva-atraso': reserva.atrasada}"
+                    >
+                        Status:
+                        <strong>{{ reserva.statusTexto }}</strong>
+                    </p>
+                </div>
+
+                <!-- Botão cancelar -->
+                <div
+                    v-if="podeCancelar(reserva)"
+                    style="display:flex; align-items:flex-end;"
+                >
+                    <button
+                        class="botao botao-secundario botao-pequeno"
+                        @click="cancelarReserva(reserva)"
+                        :disabled="cancelandoId === reserva.id"
+                    >
+                        <span v-if="cancelandoId === reserva.id">
+                            Cancelando...
+                        </span>
+                        <span v-else>
+                            Cancelar reserva
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <p
+        v-if="!carregando && !reservas.length && !erro"
+        style="margin-top: 16px; text-align:center;"
+    >
+        Você não possui reservas ativas no momento.
+    </p>
+
+    <!-- Histórico de reservas -->
+    <div class="modal-fundo" v-if="modalHistoricoAberto">
+        <div class="modal-caixa" style="max-width: 700px;">
+            <h3 class="modal-titulo">Histórico de reservas</h3>
+            <p class="modal-subtitulo">
+                Reservas de sala que já foram finalizadas ou canceladas.
+            </p>
+
+            <p v-if="carregandoHistorico" style="margin-top: 8px; font-size:0.9rem; color:#4b5563;">
+                Carregando histórico...
+            </p>
+
+            <p v-if="erroHistorico" class="admin-mensagem-erro" style="margin-top: 8px;">
+                {{ erroHistorico }}
+            </p>
+
+            <div
+                v-if="!carregandoHistorico && historico.length"
+                style="margin-top: 12px; max-height: 320px; overflow-y: auto;"
+            >
+                <article
+                    v-for="reserva in historicoOrdenado"
+                    :key="reserva.id"
+                    class="reserva-item"
+                    style="margin-bottom: 10px;"
+                >
+                    <h4 class="livro-titulo">
+                        {{ reserva.sala_nome || ('Sala ' + reserva.sala) }}
+                    </h4>
+                    <div class="emprestimo-detalhes">
+                        <div><strong>Início:</strong> {{ formatarDataHora(reserva.inicio) }}</div>
+                        <div><strong>Fim:</strong> {{ formatarDataHora(reserva.fim) }}</div>
+                    </div>
+                    <p class="reserva-status">
+                        Status:
+                        <strong>{{ reserva.statusTexto }}</strong>
+                    </p>
+                </article>
+            </div>
+
+            <p
+                v-if="!carregandoHistorico && !historico.length && !erroHistorico"
+                style="margin-top: 16px; font-size:0.9rem; color:#4b5563;"
+            >
+                Você ainda não possui reservas finalizadas ou canceladas.
+            </p>
+
+            <div class="modal-botoes" style="margin-top: 16px;">
+                <button class="botao botao-secundario" @click="fecharHistorico">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer class="rodape">
+    <div class="container">
+        <p>2025 - Sistema de Biblioteca e Salas de Estudo</p>
+    </div>
+</footer>
+
+<!-- Vue 3 -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            usuario: null,
+
+            // reservas ativas
+            reservas: [],
+            carregando: false,
+            erro: '',
+            cancelandoId: null,
+
+            // histórico de reservas
+            modalHistoricoAberto: false,
+            historico: [],
+            carregandoHistorico: false,
+            erroHistorico: ''
+        };
+    },
+    computed: {
+        reservasOrdenadas() {
+            // Ordena por início (mais antigo)
+            return [...this.reservas].sort((a, b) => {
+                const ai = a.inicio ? new Date(a.inicio).getTime() : 0;
+                const bi = b.inicio ? new Date(b.inicio).getTime() : 0;
+                return ai - bi;
+            });
+        },
+        historicoOrdenado() {
+            // Ordena histórico por início (mais recente primeiro)
+            return [...this.historico].sort((a, b) => {
+                const ai = a.inicio ? new Date(a.inicio).getTime() : 0;
+                const bi = b.inicio ? new Date(b.inicio).getTime() : 0;
+                return bi - ai;
+            });
+        }
+    },
+    methods: {
+        formatarDataHora(iso) {
+            if (!iso) return '-';
+            const d = new Date(iso);
+            return d.toLocaleString('pt-BR', {
+                dateStyle: 'short',
+                timeStyle: 'short'
+            });
+        },
+
+        podeCancelar(reserva) {
+            // Ainda agendada (mesmo que em atraso)
+            return reserva.status === 'AGENDADA' || reserva.statusTexto === 'Agendada' || reserva.statusTexto === 'ATRASO';
+        },
+
+        async carregarReservas() {
+            if (!this.usuario) return;
+
+            this.carregando = true;
+            this.erro = '';
+
+            try {
+                const resp = await fetch('http://127.0.0.1:8000/api/reservas-salas/');
+                if (!resp.ok) {
+                    throw new Error('Não foi possível carregar as reservas.');
+                }
+
+                const dadosBrutos = await resp.json();
+                const lista = Array.isArray(dadosBrutos)
+                    ? dadosBrutos
+                    : (dadosBrutos.results || []);
+
+                const agora = new Date();
+
+               // ativass
+                this.reservas = lista
+                    .filter(r => {
+                        const ehDoUsuario =
+                            r.usuario === this.usuario.id ||
+                            r.usuario_matricula === this.usuario.matricula;
+
+                        const ehAtiva = r.status === 'AGENDADA';
+
+                        return ehDoUsuario && ehAtiva;
+                    })
+                    .map(r => {
+                        const fim = r.fim ? new Date(r.fim) : null;
+                        let atrasada = false;
+                        let statusTexto = 'Agendada';
+
+                        if (fim && fim < agora) {
+                            atrasada = true;
+                            statusTexto = 'ATRASO';
+                        }
+
+                        return {
+                            ...r,
+                            atrasada,
+                            statusTexto
+                        };
+                    });
+
+            } catch (err) {
+                console.error(err);
+                this.erro = err.message || 'Erro ao carregar reservas.';
+            } finally {
+                this.carregando = false;
+            }
+        },
+
+        async cancelarReserva(reserva) {
+            if (!confirm('Deseja realmente cancelar esta reserva de sala?')) {
+                return;
+            }
+
+            this.cancelandoId = reserva.id;
+            this.erro = '';
+
+            try {
+                const resp = await fetch('http://127.0.0.1:8000/api/devolver-sala/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sala: reserva.sala })
+                });
+
+                if (!resp.ok) {
+                    const erro = await resp.json().catch(() => ({}));
+                    throw new Error(erro.detail || 'Erro ao cancelar reserva.');
+                }
+
+                alert('Reserva cancelada com sucesso!');
+                await this.carregarReservas();
+                
+            } catch (err) {
+                console.error(err);
+                this.erro = err.message || 'Erro ao cancelar reserva.';
+            } finally {
+                this.cancelandoId = null;
+            }
+        },
+
+        abrirHistorico() {
+            this.modalHistoricoAberto = true;
+            this.carregarHistorico();
+        },
+
+        fecharHistorico() {
+            this.modalHistoricoAberto = false;
+        },
+
+        async carregarHistorico() {
+            if (!this.usuario) return;
+
+            this.carregandoHistorico = true;
+            this.erroHistorico = '';
+            this.historico = [];
+
+            try {
+                const resp = await fetch('http://127.0.0.1:8000/api/reservas-salas/');
+                if (!resp.ok) {
+                    throw new Error('Não foi possível carregar o histórico.');
+                }
+
+                const dadosBrutos = await resp.json();
+                const lista = Array.isArray(dadosBrutos)
+                    ? dadosBrutos
+                    : (dadosBrutos.results || []);
+
+                this.historico = lista
+                    .filter(r => {
+                        const ehDoUsuario =
+                            r.usuario === this.usuario.id ||
+                            r.usuario_matricula === this.usuario.matricula;
+
+                        const ehHistorico = r.status && r.status !== 'AGENDADA';
+
+                        return ehDoUsuario && ehHistorico;
+                    })
+                    .map(r => {
+                        let statusTexto = 'Finalizada';
+                        if (r.status === 'FINALIZADA') {
+                            statusTexto = 'Finalizada';
+                        } else if (r.status === 'CANCELADA') {
+                            statusTexto = 'Cancelada';
+                        } else if (r.status) {
+                            statusTexto = r.status;
+                        }
+                        return {
+                            ...r,
+                            statusTexto
+                        };
+                    });
+
+            } catch (err) {
+                console.error(err);
+                this.erroHistorico = err.message || 'Erro ao carregar o histórico.';
+            } finally {
+                this.carregandoHistorico = false;
+            }
+        }
+    },
+    mounted() {
+        const dados = localStorage.getItem('usuarioLogado');
+        if (!dados) {
+            alert('Você precisa estar logado para ver suas reservas.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        this.usuario = JSON.parse(dados);
+        this.carregarReservas();
+    }
+}).mount('#app');
+</script>
+
+<!-- Script de sessão / saudação -->
+<script>
+function atualizarSaudacao() {
+    const spanSaudacao = document.getElementById('saudacao-usuario');
+    const linkEntrar   = document.getElementById('link-entrar');
+    const linkSair     = document.getElementById('link-sair');
+
+    const dados = localStorage.getItem('usuarioLogado');
+
+    if (dados) {
+        const usuario = JSON.parse(dados);
+        if (spanSaudacao) {
+            spanSaudacao.textContent = 'Bem-vindo, ' + (usuario.nome || usuario.matricula) + '!';
+        }
+        if (linkEntrar) linkEntrar.style.display = 'none';
+        if (linkSair)   linkSair.style.display   = 'inline-block';
+    } else {
+        if (spanSaudacao) spanSaudacao.textContent = '';
+        if (linkEntrar)   linkEntrar.style.display = 'inline-block';
+        if (linkSair)     linkSair.style.display   = 'none';
+    }
+}
+
+function sair() {
+    localStorage.removeItem('usuarioLogado');
+    atualizarSaudacao();
+    window.location.href = 'login.html';
+}
+
+atualizarSaudacao();
+</script>
+
+</body>
+</html>

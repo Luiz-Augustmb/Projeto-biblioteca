@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Administrativo da Biblioteca</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+
+<header class="topo">
+    <div class="container topo-conteudo">
+        <h1 class="logo">Painel Administrativo</h1>
+
+        <nav class="menu">
+            <a href="index.html" class="menu-link">Voltar ao site</a>
+
+            <span id="saudacao-usuario" class="menu-saudacao"></span>
+            <a href="login.html" class="menu-link botao-login" id="link-entrar">Entrar</a>
+            <a href="#" class="menu-link botao-login" id="link-sair" style="display:none;" onclick="sair()">Sair</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container conteudo">
+
+    <!-- Cabeçalho do painel -->
+    <section class="painel-admin-header">
+        <h2 class="painel-admin-titulo">Bem-vindo(a) <span id="saudacao-usuario"></span>ao painel administrativo da biblioteca</h2>
+        <br>
+    </section>
+
+    <!-- Mensagem geral do painel -->
+    <p id="painel-mensagem" class="admin-mensagem-erro" style="display:none; margin-bottom: 10px;"></p>
+
+    <!-- Grid de cards -->
+    <section class="admin-grid">
+
+        <!-- Cadastrar usuário -->
+        <article class="admin-card">
+            <h3>Cadastrar usuário</h3>
+            <button class="botao botao-principal admin-botao-cheio" id="btn-cadastrar-usuario">
+                Abrir cadastro de usuário
+            </button>
+        </article>
+
+        <!-- Cadastrar livro -->
+        <article class="admin-card">
+            <h3>Cadastrar livro</h3>
+            <button class="botao botao-principal admin-botao-cheio" id="btn-cadastrar-livro">
+                Abrir cadastro de livro
+            </button>
+        </article>
+
+        <!-- Registrar empréstimo de livro (alocar livro para aluno) -->
+        <article class="admin-card">
+            <h3>Alocar livro para aluno</h3>
+            <button class="botao botao-principal admin-botao-cheio" id="btn-registrar-emprestimo">
+                Registrar empréstimo de livro
+            </button>
+        </article>
+
+        <!-- Registrar devolução de livro -->
+        <article class="admin-card">
+            <h3>Registrar devolução de livro</h3>
+            <button class="botao botao-principal admin-botao-cheio" id="btn-registrar-devolucao">
+                Registrar devolução
+            </button>
+        </article>
+
+        <!-- Reservar sala de estudo -->
+        <article class="admin-card">
+            <h3>Alocar sala de estudo</h3>
+            <button class="botao botao-principal admin-botao-cheio" id="btn-reservar-sala">
+                Registrar reserva de sala
+            </button>
+        </article>
+
+        <!-- Abrir Django Admin -->
+        <article class="admin-card">
+            <h3>Painel avançado</h3>
+            <button class="botao botao-secundario admin-botao-cheio" id="btn-django-admin">
+                Abrir Django Admin
+            </button>
+        </article>
+
+    </section>
+</main>
+
+<footer class="rodape">
+    <div class="container">
+        <p>2025 - Painel Administrativo</p>
+    </div>
+</footer>
+
+<!-- Cadastrar usuário -->
+<div class="modal-fundo" id="modal-usuario" style="display:none;">
+    <div class="modal-caixa">
+        <h3 class="modal-titulo">Cadastrar usuário</h3>
+        <form id="form-usuario" style="margin-top: 14px;">
+            <label class="form-label">
+                <p style="text-align: left;">Nome completo: </p>
+                <input type="text" class="form-input" id="usuario-nome" required>
+            </label>
+
+            <label class="form-label">
+                <p style="text-align: left;">Matrícula (login): </p>
+                <input type="text" class="form-input" id="usuario-matricula" required>
+            </label>
+
+            <label class="form-label">
+                 <p style="text-align: left;">E-mail: </p>
+                <input type="email" class="form-input" id="usuario-email">
+            </label>
+
+            <label class="form-label">
+                <p style="text-align: left;">Telefone: </p>
+                <input type="text" class="form-input" id="usuario-telefone">
+            </label>
+
+            <label class="form-label">
+                <p style="text-align: left;">Senha: </p>
+                <input type="password" class="form-input" id="usuario-senha" required>
+            </label>
+
+            <div style="margin-top: 8px; font-size:0.9rem;">
+                <label style="margin-right: 12px;">
+                    <input type="checkbox" id="usuario-funcionario">
+                    Marcar como funcionário (acesso ao painel)
+                </label>
+            </div>
+
+            <div class="modal-botoes">
+                <button type="button" class="botao botao-secundario" onclick="fecharModal('modal-usuario')">
+                    Cancelar
+                </button>
+                <button type="submit" class="botao botao-principal">
+                    Salvar usuário
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Cadastrar livro -->
+<div class="modal-fundo" id="modal-livro" style="display:none;">
+    <div class="modal-caixa">
+        <h3 class="modal-titulo">Cadastrar livro</h3>
+        <form id="form-livro" style="margin-top: 14px;">
+            <label class="form-label">
+                <p style="text-align: left;">Título do livro: </p>
+                <input type="text" class="form-input" id="livro-titulo" required>
+            </label>
+
+            <label class="form-label">
+                <p style="text-align: left;">Autor: </p>
+                <input type="text" class="form-input" id="livro-autor" required>
+            </label>
+
+            <label class="form-label">
+                <p style="text-align: left;">Categoria: </p>
+                <input type="text" class="form-input" id="livro-categoria">
+            </label>
+
+            <label class="form-label">
+                <p style="text-align: left;">Código interno do livro: </p>
+                <input type="text" class="form-input" id="livro-codigo" required>
+            </label>
+
+            <label class="form-label">
+                <p style="text-align: left;">Quantidade disponível: </p>
+                <input type="number" class="form-input" id="livro-quantidade" min="1" value="1" required>
+            </label>
+
+            <div class="modal-botoes">
+                <button type="button" class="botao botao-secundario" onclick="fecharModal('modal-livro')">
+                    Cancelar
+                </button>
+                <button type="submit" class="botao botao-principal">
+                    Salvar livro
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Registrar empréstimo de livro -->
+<div class="modal-fundo" id="modal-emprestimo" style="display:none;">
+    <div class="modal-caixa">
+        <h3 class="modal-titulo">Registrar empréstimo de livro</h3>
+        <form id="form-emprestimo" style="margin-top: 14px;">
+            <label class="form-label">
+                <p style="text-align: left;">Código do livro: </p>
+                <input type="text" class="form-input" id="emp-codigo-livro" required>
+            </label>
+
+            <div class="emprestimo-detalhes" id="emp-detalhes-livro" style="font-size:0.85rem; color:#4b5563; margin-bottom:8px;"></div>
+            
+            <label class="form-label">
+                <p style="text-align: left;">Matrícula do aluno: </p>
+                <input type="text" class="form-input" id="emp-matricula" required>
+            </label>
+
+            <div class="emprestimo-detalhes" id="emp-detalhes-aluno" style="font-size:0.85rem; color:#4b5563; margin-bottom:8px;"></div>
+
+            <label class="form-label">
+                <p style="text-align: left;">Data de saída: </p>    
+                <input type="text" class="form-input" id="emp-data-saida" readonly>
+            </label>
+
+            <label class="form-label">
+                <p style="text-align: left;">Data de devolução prevista: </p>
+                <input type="text" class="form-input" id="emp-data-prevista" readonly>
+            </label>
+
+            <div class="modal-botoes">
+                <button type="button" class="botao botao-secundario" onclick="fecharModal('modal-emprestimo')">
+                    Cancelar
+                </button>
+                <button type="submit" class="botao botao-principal">
+                    Salvar empréstimo
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!--  Registrar devolução -->
+<div class="modal-fundo" id="modal-devolucao" style="display:none;">
+    <div class="modal-caixa">
+        <h3 class="modal-titulo">Registrar devolução de livro</h3>
+        <div style="margin-top: 14px;">
+            <label class="form-label">
+                <p style="text-align: left;">Matrícula do aluno: </p>
+                <input type="text" class="form-input" id="dev-matricula">
+            </label>
+            <button class="botao botao-principal botao-pequeno" style="margin-top:6px;" id="btn-dev-buscar">
+                Buscar empréstimos
+            </button>
+        </div>
+        <!-- Lista de empréstimos em aberto do aluno -->
+        <div id="dev-lista" style="margin-top: 14px; max-height:300px; overflow-y:auto; font-size:0.9rem;"></div>
+        <div class="modal-botoes" style="margin-top: 16px;">
+            <button type="button" class="botao botao-secundario" onclick="fecharModal('modal-devolucao')">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Reservar sala de estudo -->
+<div class="modal-fundo" id="modal-sala" style="display:none;">
+    <div class="modal-caixa" style="max-width: 780px;">
+        <h3 class="modal-titulo">Reservar sala de estudo</h3>
+        <div id="sala-mensagem" class="admin-mensagem-erro" style="display:none; margin-top: 8px;"></div>
+        <div class="salas-grid" id="sala-grid" style="margin-top: 12px;">
+            <!-- 6 salas renderizadas via JS -->
+        </div>
+
+        <div class="modal-botoes" style="margin-top: 16px;">
+            <button type="button" class="botao botao-secundario" onclick="fecharModal('modal-sala')">
+                Fechar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+
+const API_BASE = 'http://127.0.0.1:8000/api';
+
+const ENDPOINT_USUARIOS_CRIAR     = `${API_BASE}/usuarios/`;           // POST para criar usuário
+const ENDPOINT_USUARIOS_BUSCA     = `${API_BASE}/buscar-usuario/`;     // GET ?matricula=
+const ENDPOINT_LIVROS             = `${API_BASE}/livros/`;             // GET/POST livros
+const ENDPOINT_EMPRESTIMOS        = `${API_BASE}/emprestimos/`;        // (usado só para listar simples)
+const ENDPOINT_EMPRESTIMOS_ALUNO  = `${API_BASE}/emprestimos-aluno/`;  // GET ?matricula=
+const ENDPOINT_DEVOLVER_EMPRESTIMO = `${API_BASE}/devolver-emprestimo/`; // POST {emprestimo_id}
+const ENDPOINT_STATUS_SALAS       = `${API_BASE}/status-salas/`;       // GET status atual das salas
+const ENDPOINT_RESERVAS_SALA      = `${API_BASE}/reservas-salas/`;     // POST reserva
+const ENDPOINT_DEVOLVER_SALA      = `${API_BASE}/devolver-sala/`;      // POST {sala}
+
+/*cabeçalho e funções comuns*/
+
+function atualizarSaudacao() {
+    const spanSaudacao = document.getElementById('saudacao-usuario');
+    const linkEntrar   = document.getElementById('link-entrar');
+    const linkSair     = document.getElementById('link-sair');
+
+    const dados = localStorage.getItem('usuarioLogado');
+
+    if (dados) {
+        const usuario = JSON.parse(dados);
+        if (spanSaudacao) {
+            spanSaudacao.textContent = 'Bem-vindo, ' + (usuario.nome || usuario.matricula) + '!';
+        }
+        if (linkEntrar) linkEntrar.style.display = 'none';
+        if (linkSair)   linkSair.style.display   = 'inline-block';
+    } else {
+        if (spanSaudacao) spanSaudacao.textContent = '';
+        if (linkEntrar)   linkEntrar.style.display = 'inline-block';
+        if (linkSair)     linkSair.style.display   = 'none';
+    }
+}
+
+function sair() {
+    localStorage.removeItem('usuarioLogado');
+    atualizarSaudacao();
+    window.location.href = 'login.html';
+}
+
+atualizarSaudacao();
+
+function abrirModal(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'flex';
+}
+
+function fecharModal(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+}
+
+/*
+   BOTÕES DO PAINEL
+*/   
+document.getElementById('btn-cadastrar-usuario')
+    .addEventListener('click', () => abrirModal('modal-usuario'));
+
+document.getElementById('btn-cadastrar-livro')
+    .addEventListener('click', () => abrirModal('modal-livro'));
+
+document.getElementById('btn-registrar-emprestimo')
+    .addEventListener('click', () => {
+        preencherDatasEmprestimo();
+        abrirModal('modal-emprestimo');
+    });
+
+document.getElementById('btn-registrar-devolucao')
+    .addEventListener('click', () => abrirModal('modal-devolucao'));
+
+document.getElementById('btn-reservar-sala')
+    .addEventListener('click', () => {
+        carregarSalas();
+        abrirModal('modal-sala');
+    });
+
+document.getElementById('btn-django-admin')
+    .addEventListener('click', () => {
+        window.open('http://127.0.0.1:8000/admin/', '_blank');
+    });
+
+/* cadastrar usuário */
+
+document.getElementById('form-usuario').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const nome        = document.getElementById('usuario-nome').value.trim();
+    const matricula   = document.getElementById('usuario-matricula').value.trim();
+    const email       = document.getElementById('usuario-email').value.trim();
+    const telefone    = document.getElementById('usuario-telefone').value.trim();
+    const senha       = document.getElementById('usuario-senha').value;
+    const funcionario = document.getElementById('usuario-funcionario').checked;
+
+    try {
+        const resp = await fetch(ENDPOINT_USUARIOS_CRIAR, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                nome,
+                matricula,
+                login: matricula,
+                email,
+                telefone,
+                senha,
+                tipo: funcionario ? 'FUNCIONARIO' : 'ALUNO'
+            })
+        });
+
+        if (!resp.ok) {
+            const erro = await resp.json().catch(() => ({}));
+            throw new Error(erro.detail || 'Erro ao cadastrar usuário.');
+        }
+
+        alert('Usuário cadastrado com sucesso!');
+        document.getElementById('form-usuario').reset();
+        fecharModal('modal-usuario');
+    } catch (err) {
+        console.error(err);
+        alert(err.message || 'Erro ao cadastrar usuário.');
+    }
+});
+
+/* cadastrar livro */
+
+document.getElementById('form-livro').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const titulo     = document.getElementById('livro-titulo').value.trim();
+    const autor      = document.getElementById('livro-autor').value.trim();
+    const categoria  = document.getElementById('livro-categoria').value.trim();
+    const codigo     = document.getElementById('livro-codigo').value.trim();
+    const quantidade = parseInt(document.getElementById('livro-quantidade').value || '1', 10);
+
+    try {
+        const resp = await fetch(ENDPOINT_LIVROS, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                titulo,
+                autor,
+                categoria,
+                codigo,
+                quantidade_total: quantidade,
+                quantidade_disponivel: quantidade
+            })
+        });
+
+        if (!resp.ok) {
+            const erro = await resp.json().catch(() => ({}));
+            throw new Error(erro.detail || 'Erro ao cadastrar livro.');
+        }
+
+        alert('Livro cadastrado com sucesso!');
+        document.getElementById('form-livro').reset();
+        fecharModal('modal-livro');
+    } catch (err) {
+        console.error(err);
+        alert(err.message || 'Erro ao cadastrar livro.');
+    }
+});
+
+/* registrar empréstimo de livro */
+
+function preencherDatasEmprestimo() {
+    const hoje = new Date();
+    const saida = hoje.toISOString().split('T')[0]; // ano-mes-dia
+    const devolucao = new Date(hoje);
+    devolucao.setDate(devolucao.getDate() + 7);
+    const prev = devolucao.toISOString().split('T')[0];
+    document.getElementById('emp-data-saida').value    = saida;
+    document.getElementById('emp-data-prevista').value = prev;
+    document.getElementById('emp-detalhes-livro').textContent  = '';
+    document.getElementById('emp-detalhes-aluno').textContent  = '';
+    document.getElementById('emp-codigo-livro').value          = '';
+    document.getElementById('emp-matricula').value             = '';
+}
+
+document.getElementById('emp-codigo-livro').addEventListener('blur', async () => {
+    const codigo = document.getElementById('emp-codigo-livro').value.trim();
+    if (!codigo) return;
+
+    try {
+        const resp = await fetch(`${ENDPOINT_LIVROS}?codigo=${encodeURIComponent(codigo)}`);
+        if (!resp.ok) throw new Error('Erro ao buscar livro.');
+        const dados = await resp.json();
+
+        const livro = Array.isArray(dados) ? dados[0] : dados.results?.[0];
+        const alvo  = document.getElementById('emp-detalhes-livro');
+
+        if (!livro) {
+            alvo.textContent = 'Livro não encontrado.';
+        } else {
+            alvo.textContent = `Livro: ${livro.titulo} | Categoria: ${livro.categoria || '—'}`;
+        }
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+document.getElementById('emp-matricula').addEventListener('blur', async () => {
+    const mat = document.getElementById('emp-matricula').value.trim();
+    if (!mat) return;
+
+    try {
+        const resp = await fetch(`${ENDPOINT_USUARIOS_BUSCA}?matricula=${encodeURIComponent(mat)}`);
+        if (!resp.ok) throw new Error('Erro ao buscar usuário.');
+        const usuario = await resp.json();
+
+        const alvo = document.getElementById('emp-detalhes-aluno');
+        if (!usuario || usuario.detail) {
+            alvo.textContent = 'Usuário não encontrado.';
+        } else {
+            alvo.textContent = `Aluno: ${usuario.nome || '—'}`;
+        }
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+document.getElementById('form-emprestimo').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const codigoLivro = document.getElementById('emp-codigo-livro').value.trim();
+    const matricula   = document.getElementById('emp-matricula').value.trim();
+    const dataSaida   = document.getElementById('emp-data-saida').value;
+    const dataPrev    = document.getElementById('emp-data-prevista').value;
+
+    try {
+        // Busca livro por código
+        const respLivro = await fetch(`${ENDPOINT_LIVROS}?codigo=${encodeURIComponent(codigoLivro)}`);
+        const dadosLiv  = await respLivro.json();
+        const livro     = Array.isArray(dadosLiv) ? dadosLiv[0] : dadosLiv.results?.[0];
+        if (!livro) throw new Error('Livro não encontrado.');
+
+        // Busca usuário por matrícula
+        const respUser = await fetch(`${ENDPOINT_USUARIOS_BUSCA}?matricula=${encodeURIComponent(matricula)}`);
+        const usuario  = await respUser.json();
+        if (!usuario || usuario.detail) throw new Error('Usuário não encontrado.');
+
+        // Criar empréstimo
+        const respEmp = await fetch(ENDPOINT_EMPRESTIMOS, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                usuario: usuario.id,
+                livro:   livro.id,
+                data_emprestimo:         dataSaida,
+                data_devolucao_prevista: dataPrev
+            })
+        });
+
+        if (!respEmp.ok) {
+            const erro = await respEmp.json().catch(() => ({}));
+            throw new Error(erro.detail || 'Erro ao registrar empréstimo.');
+        }
+
+        alert('Empréstimo registrado com sucesso!');
+        document.getElementById('form-emprestimo').reset();
+        fecharModal('modal-emprestimo');
+    } catch (err) {
+        console.error(err);
+        alert(err.message || 'Erro ao registrar empréstimo.');
+    }
+});
+
+/* registrar devolução de livro */
+
+document.getElementById('btn-dev-buscar').addEventListener('click', async (e) => {
+    e.preventDefault();
+    const matricula = document.getElementById('dev-matricula').value.trim();
+    const listaEl   = document.getElementById('dev-lista');
+    listaEl.innerHTML = '';
+
+    if (!matricula) {
+        listaEl.textContent = 'Informe a matrícula.';
+        return;
+    }
+
+    try {
+        // Busca todos empréstimos em aberto do aluno pela matricula
+        const resp = await fetch(`${ENDPOINT_EMPRESTIMOS_ALUNO}?matricula=${encodeURIComponent(matricula)}`);
+        const dados = await resp.json();
+
+        if (dados.detail) {
+            listaEl.textContent = dados.detail;
+            return;
+        }
+
+        const emprestimos = dados.emprestimos || [];
+        const hoje = new Date();
+
+        if (!emprestimos.length) {
+            listaEl.textContent = 'Nenhum empréstimo em aberto para este aluno.';
+            return;
+        }
+
+        emprestimos.forEach(emp => {
+            const div = document.createElement('div');
+            div.className = 'emprestimo-item';
+
+            const prev = emp.data_devolucao_prevista ? new Date(emp.data_devolucao_prevista) : null;
+            const atrasado = prev && prev < hoje;
+
+            if (atrasado) div.classList.add('emprestimo-item-atrasado');
+
+            div.innerHTML = `
+                <div>
+                    <strong>${emp.livro_titulo || 'Livro'}</strong>
+                    <div class="emprestimo-detalhes">
+                        <div><strong>Retirada:</strong> ${emp.data_emprestimo || '-'}</div>
+                        <div><strong>Previsto para:</strong> ${emp.data_devolucao_prevista || '-'}</div>
+                    </div>
+                </div>
+                <div style="text-align:right;">
+                    <button class="botao botao-principal botao-pequeno" data-id="${emp.id}">
+                        Devolver
+                    </button>
+                    <div style="margin-top:4px; font-size:0.8rem; ${atrasado ? 'color:#b91c1c;font-weight:bold;' : 'color:#15803d;'}">
+                        ${atrasado ? 'ATRASO' : (emp.status || 'ABERTO')}
+                    </div>
+                </div>
+            `;
+
+            listaEl.appendChild(div);
+        });
+        // Adiciona evento aos botões de devolução
+        listaEl.querySelectorAll('button[data-id]').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const idEmp = btn.getAttribute('data-id');
+                try {
+                    const respDev = await fetch(ENDPOINT_DEVOLVER_EMPRESTIMO, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ emprestimo_id: idEmp })
+                    });
+
+                    const resultado = await respDev.json();
+                    if (!respDev.ok) {
+                        throw new Error(resultado.detail || 'Erro ao registrar devolução.');
+                    }
+
+                    alert('Devolução registrada com sucesso!');
+                    btn.disabled = true;
+                    btn.textContent = 'Devolvido';
+                } catch (err) {
+                    console.error(err);
+                    alert(err.message || 'Erro ao registrar devolução.');
+                }
+            });
+        });
+
+    } catch (err) {
+        console.error(err);
+        listaEl.textContent = 'Erro ao buscar empréstimos.';
+    }
+});
+
+/* reservar sala de estudo */
+
+function formatarHoraISO(iso) {
+    if (!iso) return '-';
+    const dt = new Date(iso);
+    const h  = String(dt.getHours()).padStart(2, '0');
+    const m  = String(dt.getMinutes()).padStart(2, '0');
+    return `${h}:${m}`;
+}
+
+async function carregarSalas() {
+    const grid = document.getElementById('sala-grid');
+    const msg  = document.getElementById('sala-mensagem');
+    grid.innerHTML = '';
+    msg.style.display = 'none';
+
+    try {
+        const resp = await fetch(ENDPOINT_STATUS_SALAS);
+        if (!resp.ok) throw new Error('Erro ao carregar salas.');
+        const dados = await resp.json();
+        const salas = Array.isArray(dados) ? dados : dados.results || [];
+
+        salas.forEach(sala => {
+            const card = document.createElement('div');
+            card.className = 'sala-card';
+
+            let textoStatus = 'Sala disponível';
+            let infoExtra   = 'Sem reserva neste horário.';
+            let ocupada     = false;
+
+            if (sala.ocupada) {
+                ocupada = true;
+                card.classList.add('sala-ocupada');
+                textoStatus = sala.atrasada ? 'Ocupada (atraso)' : 'Ocupada';
+                infoExtra = `Aluno: <strong>${sala.usuario_nome}</strong><br>
+                             Até: ${formatarHoraISO(sala.fim)}`;
+            } else {
+                card.classList.add('sala-livre');
+            }
+
+            card.innerHTML = `
+                <div class="sala-topo">
+                    <span class="sala-titulo">${sala.nome || ('Sala ' + sala.id)}</span>
+                    <span class="${ocupada ? 'sala-status-ocupada' : 'sala-status-livre'}">
+                        ${textoStatus}
+                    </span>
+                </div>
+
+                <div style="font-size:0.85rem; margin-bottom:6px;">
+                    ${infoExtra}
+                </div>
+
+                <div class="sala-acoes"></div>
+            `;
+
+            const acoes = card.querySelector('.sala-acoes');
+
+            if (ocupada) {
+                // Botão de devolução da sala
+                const btnDev = document.createElement('button');
+                btnDev.className = 'botao botao-secundario botao-pequeno';
+                btnDev.textContent = 'Devolver sala';
+                btnDev.addEventListener('click', () => devolverSala(sala.id));
+                acoes.appendChild(btnDev);
+            } else {
+                // FORM para reservar
+                acoes.innerHTML = `
+                    <label class="form-label">
+                        Matrícula do aluno
+                        <input type="text" class="form-input" id="sala-matricula-${sala.id}">
+                    </label>
+                    <button class="botao botao-principal botao-pequeno" style="margin-top:6px;" data-sala="${sala.id}">
+                        Salvar reserva
+                    </button>
+                    <div id="sala-info-${sala.id}" style="font-size:0.8rem; margin-top:4px; color:#4b5563;"></div>
+                `;
+            }
+
+            grid.appendChild(card);
+        });
+
+        // salvar sala (livre)
+        grid.querySelectorAll('button[data-sala]').forEach(btn => {
+            btn.addEventListener('click', () => salvarReservaSala(btn.getAttribute('data-sala')));
+        });
+
+    } catch (err) {
+        console.error(err);
+        msg.textContent = err.message || 'Erro ao carregar salas.';
+        msg.style.display = 'block';
+    }
+}
+
+async function salvarReservaSala(idSala) {
+    const campoMat = document.getElementById(`sala-matricula-${idSala}`);
+    const info     = document.getElementById(`sala-info-${idSala}`);
+    const matricula = campoMat.value.trim();
+
+    if (!matricula) {
+        info.textContent = 'Informe a matrícula do aluno.';
+        return;
+    }
+
+    try {
+        // Buscar usuário pela matrícula
+        const respUser = await fetch(`${ENDPOINT_USUARIOS_BUSCA}?matricula=${encodeURIComponent(matricula)}`);
+        const usuario  = await respUser.json();
+
+        if (!usuario || usuario.detail) {
+            info.textContent = 'Usuário não encontrado.';
+            return;
+        }
+
+        const agora = new Date();
+        const fim   = new Date(agora);
+        fim.setHours(fim.getHours() + 1);
+
+        const inicioStr = agora.toISOString();
+        const fimStr    = fim.toISOString();
+
+        const resp = await fetch(ENDPOINT_RESERVAS_SALA, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                usuario: usuario.id,
+                sala: idSala,
+                inicio: inicioStr,
+                fim: fimStr
+            })
+        });
+
+        const resultado = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(resultado.detail || 'Erro ao salvar reserva da sala.');
+
+        alert('Reserva registrada com sucesso!');
+        carregarSalas();
+    } catch (err) {
+        console.error(err);
+        info.textContent = err.message || 'Erro ao salvar reserva.';
+    }
+}
+
+async function devolverSala(idSala) {
+    if (!confirm('Confirmar devolução desta sala?')) return;
+
+    try {
+        const resp = await fetch(ENDPOINT_DEVOLVER_SALA, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sala: idSala })
+        });
+
+        const dados = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(dados.detail || 'Erro ao devolver sala.');
+
+        alert('Sala devolvida e liberada com sucesso!');
+        carregarSalas();
+    } catch (err) {
+        console.error(err);
+        alert(err.message || 'Erro ao devolver sala.');
+    }
+}
+</script>
+
+</body>
+</html>

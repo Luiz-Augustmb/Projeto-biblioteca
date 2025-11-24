@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca e Salas de Estudo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+</head>
+<body>
+
+<header class="topo">
+    <div class="container topo-conteudo">
+        <h1 class="logo">Biblioteca</h1>
+
+        <nav class="menu">
+            <a href="index.html" class="menu-link menu-link-ativo">Início</a>
+            <a href="livros.html" class="menu-link">Livros</a>
+            <a href="meus-emprestimos.html" class="menu-link">Meus empréstimos</a>
+            <a href="salas.html" class="menu-link">Salas</a>
+            <a href="minhas-reservas.html" class="menu-link">Minhas reservas</a>
+
+            <span id="saudacao-usuario" class="menu-saudacao"></span>
+            <a href="login.html" class="menu-link botao-login" id="link-entrar">Entrar</a>
+            <a href="#" class="menu-link botao-login" id="link-sair" style="display:none;" onclick="sair()">Sair</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container conteudo">
+
+    <!-- boas vindas -->
+    <section class="inicio-hero">
+        <h2 class="titulo-pagina">Bem-vindo(a) à biblioteca</h2>
+        <p class="subtitulo-pagina">
+            Explore nosso acervo de livros e reserve salas de estudo conforme sua necessidade.
+        </p>
+
+        <div class="inicio-hero-botoes">
+            <a class="botao botao-principal" href="livros.html">
+                Ver livros
+            </a>
+            <a class="botao botao-secundario" href="salas.html">
+                Reservar sala
+            </a>
+        </div>
+    </section>
+
+    <!-- Atalhos rápidos -->
+    <section style="margin-top: 18px;">
+        <h3 class="inicio-atalhos-titulo">Atalhos rápidos</h3>
+
+        <div class="atalhos-grid">
+            <!-- Card Livros -->
+            <article class="atalho-card">
+                <h3>Livros</h3>
+                <p>Veja o catálogo de livros disponíveis para empréstimo.</p>
+                <a class="botao botao-principal" href="livros.html">
+                    Ir para livros
+                </a>
+            </article>
+
+            <!-- Card Meus empréstimos -->
+            <article class="atalho-card">
+                <h3>Meus empréstimos</h3>
+                <p>Acompanhe os livros que você já pegou e os prazos de devolução.</p>
+                <a class="botao botao-principal" href="meus-emprestimos.html">
+                    Ver empréstimos
+                </a>
+            </article>
+
+            <!-- Card Salas de estudo -->
+            <article class="atalho-card">
+                <h3>Salas de estudo</h3>
+                <p>Consulte as salas disponíveis na biblioteca e faça reservas.</p>
+                <a class="botao botao-principal" href="salas.html">
+                    Ver salas
+                </a>
+            </article>
+
+            <!-- Card Minhas reservas -->
+            <article class="atalho-card">
+                <h3>Minhas reservas de sala</h3>
+                <p>Veja as reservas de sala que você já fez e seus horários.</p>
+                <a class="botao botao-principal" href="minhas-reservas.html">
+                    Ver reservas
+                </a>
+            </article>
+        </div>
+    </section>
+
+</main>
+
+<footer class="rodape">
+    <div class="container">
+        <p>2025 - Sistema de Biblioteca e Salas de Estudo</p>
+    </div>
+</footer>
+
+<script>
+    /* cabeçalho e funções comuns */
+    function atualizarSaudacao() {
+        const spanSaudacao = document.getElementById('saudacao-usuario');
+        const linkEntrar = document.getElementById('link-entrar');
+        const linkSair = document.getElementById('link-sair');
+
+        const dados = localStorage.getItem('usuarioLogado');
+
+        if (dados) {
+            const usuario = JSON.parse(dados);
+            if (spanSaudacao) {
+                spanSaudacao.textContent = 'Bem-vindo, ' + (usuario.nome || usuario.matricula) + '!';
+            }
+            if (linkEntrar) linkEntrar.style.display = 'none';
+            if (linkSair) linkSair.style.display = 'inline-block';
+        } else {
+            if (spanSaudacao) spanSaudacao.textContent = '';
+            if (linkEntrar) linkEntrar.style.display = 'inline-block';
+            if (linkSair) linkSair.style.display = 'none';
+        }
+    }
+
+    function sair() {
+        localStorage.removeItem('usuarioLogado');
+        atualizarSaudacao();
+        window.location.href = 'login.html';
+    }
+
+    atualizarSaudacao();
+</script>
+
+</body>
+</html>

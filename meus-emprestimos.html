@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Biblioteca - Meus empréstimos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="topo">
+    <div class="container topo-conteudo">
+        <h1 class="logo">Biblioteca</h1>
+        <nav class="menu">
+            <a href="index.html" class="menu-link">Início</a>
+            <a href="livros.html" class="menu-link">Livros</a>
+            <a href="meus-emprestimos.html" class="menu-link menu-link-ativo">Meus empréstimos</a>
+            <a href="salas.html" class="menu-link">Salas</a>
+            <a href="minhas-reservas.html" class="menu-link">Minhas reservas</a>
+
+            <span id="saudacao-usuario" class="menu-saudacao"></span>
+            <a href="login.html" class="menu-link botao-login" id="link-entrar">Entrar</a>
+            <a href="#" class="menu-link botao-login" id="link-sair" style="display:none;" onclick="sair()">Sair</a>
+        </nav>
+    </div>
+</header>
+
+<main class="container conteudo" id="app">
+
+    <section class="cabecalho-pagina" style="display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;">
+        <div>
+            <h2 class="titulo-pagina">Meus empréstimos de livros</h2>
+            <p class="subtitulo-pagina">
+                Aqui você vê os livros que estão emprestados no momento. Você pode devolver um livro ou consultar seu histórico.
+            </p>
+        </div>
+
+        <div>
+            <button class="botao botao-secundario botao-pequeno" @click="abrirHistorico">
+                Ver histórico de empréstimos
+            </button>
+        </div>
+    </section>
+
+    <!-- Mensagens -->
+    <p v-if="carregando" style="margin-top: 8px; font-size: 0.95rem; color:#4b5563;">
+        Carregando empréstimos...
+    </p>
+
+    <p v-if="erro" class="admin-mensagem-erro" style="margin-top: 8px;">
+        {{ erro }}
+    </p>
+
+    <!-- Empréstimos ATIVOS -->
+    <section v-if="!carregando && emprestimos.length" style="margin-top: 16px;">
+        <article
+            v-for="emp in emprestimosOrdenados"
+            :key="emp.id"
+            class="emprestimo-item"
+            :class="{'emprestimo-item-atrasado': emp.atrasado}"
+        >
+            <div>
+                <h3 class="livro-titulo">{{ emp.livro_titulo }}</h3>
+                <div class="emprestimo-detalhes">
+                    <div><strong>Retirada:</strong> {{ formatarData(emp.data_emprestimo) }}</div>
+                    <div><strong>Devolução prevista:</strong> {{ formatarData(emp.data_devolucao_prevista) }}</div>
+                </div>
+                <p
+                    class="reserva-status"
+                    :class="{'reserva-atraso': emp.atrasado}"
+                >
+                    Status:
+                    <strong>{{ emp.statusTexto }}</strong>
+                </p>
+            </div>
+
+            <div style="text-align:right; display:flex; flex-direction:column; justify-content:flex-end; gap:6px;">
+                <button
+                    class="botao botao-principal botao-pequeno"
+                    @click="devolverEmprestimo(emp)"
+                    :disabled="devolvendoId === emp.id"
+                >
+                    <span v-if="devolvendoId === emp.id">Devolvendo...</span>
+                    <span v-else>Devolver</span>
+                </button>
+            </div>
+        </article>
+    </section>
+
+    <p
+        v-if="!carregando && !emprestimos.length && !erro"
+        style="margin-top: 16px; text-align:center;"
+    >
+        Você não possui empréstimos ativos no momento.
+    </p>
+
+    <!-- Histórico de empréstimos -->
+    <div class="modal-fundo" v-if="modalHistoricoAberto">
+        <div class="modal-caixa" style="max-width: 700px;">
+            <h3 class="modal-titulo">Histórico de empréstimos</h3>
+            <p class="modal-subtitulo">
+                Livros que você já devolveu à biblioteca.
+            </p>
+
+            <p v-if="carregandoHistorico" style="margin-top: 8px; font-size:0.9rem; color:#4b5563;">
+                Carregando histórico...
+            </p>
+
+            <p v-if="erroHistorico" class="admin-mensagem-erro" style="margin-top: 8px;">
+                {{ erroHistorico }}
+            </p>
+
+            <div
+                v-if="!carregandoHistorico && historico.length"
+                style="margin-top: 12px; max-height: 320px; overflow-y: auto;"
+            >
+                <article
+                    v-for="emp in historicoOrdenado"
+                    :key="emp.id"
+                    class="reserva-item"
+                    style="margin-bottom: 10px;"
+                >
+                    <h4 class="livro-titulo">{{ emp.livro_titulo }}</h4>
+                    <div class="emprestimo-detalhes">
+                        <div><strong>Retirada:</strong> {{ formatarData(emp.data_emprestimo) }}</div>
+                        <div><strong>Devolvido em:</strong> {{ formatarData(emp.data_devolucao_real) }}</div>
+                    </div>
+                    <p class="reserva-status">
+                        Status:
+                        <strong>{{ emp.statusTexto }}</strong>
+                    </p>
+                </article>
+            </div>
+
+            <p
+                v-if="!carregandoHistorico && !historico.length && !erroHistorico"
+                style="margin-top: 16px; font-size:0.9rem; color:#4b5563;"
+            >
+                Você ainda não possui empréstimos finalizados.
+            </p>
+
+            <div class="modal-botoes" style="margin-top: 16px;">
+                <button class="botao botao-secundario" @click="fecharHistorico">
+                    Fechar
+                </button>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<footer class="rodape">
+    <div class="container">
+        <p>2025 - Sistema de Biblioteca e Salas de Estudo</p>
+    </div>
+</footer>
+
+<!-- Vue 3 -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+<script>
+const { createApp } = Vue;
+
+createApp({
+    data() {
+        return {
+            usuario: null,
+
+            // empréstimos ativos
+            emprestimos: [],
+            carregando: false,
+            erro: '',
+            devolvendoId: null,
+
+            // histórico no modal
+            modalHistoricoAberto: false,
+            historico: [],
+            carregandoHistorico: false,
+            erroHistorico: ''
+        };
+    },
+    computed: {
+        emprestimosOrdenados() {
+            // mais antigos primeiro
+            return [...this.emprestimos].sort((a, b) => {
+                const da = a.data_emprestimo ? new Date(a.data_emprestimo).getTime() : 0;
+                const db = b.data_emprestimo ? new Date(b.data_emprestimo).getTime() : 0;
+                return da - db;
+            });
+        },
+        historicoOrdenado() {
+            // mais recentes primeiro
+            return [...this.historico].sort((a, b) => {
+                const da = a.data_devolucao_real ? new Date(a.data_devolucao_real).getTime() : 0;
+                const db = b.data_devolucao_real ? new Date(b.data_devolucao_real).getTime() : 0;
+                return db - da;
+            });
+        }
+    },
+    methods: {
+        formatarData(iso) {
+            if (!iso) return '-';
+            const d = new Date(iso);
+            return d.toLocaleDateString('pt-BR');
+        },
+
+        async carregarEmprestimosAtivos() {
+            if (!this.usuario) return;
+
+            this.carregando = true;
+            this.erro = '';
+            this.emprestimos = [];
+
+            try {
+                // usa a API criada para empréstimos do aluno
+                const url = `http://127.0.0.1:8000/api/emprestimos-aluno/?matricula=${encodeURIComponent(this.usuario.matricula)}`;
+                const resp = await fetch(url);
+                if (!resp.ok) {
+                    throw new Error('Não foi possível carregar seus empréstimos.');
+                }
+
+                const dados = await resp.json();
+                const lista = dados.emprestimos || [];
+
+                const hoje = new Date();
+
+                this.emprestimos = lista.map(e => {
+                    const prev = e.data_devolucao_prevista ? new Date(e.data_devolucao_prevista) : null;
+                    let atrasado = false;
+                    let statusTexto = 'Em andamento';
+
+                    if (prev && prev < hoje) {
+                        atrasado = true;
+                        statusTexto = 'ATRASO';
+                    }
+
+                    return {
+                        ...e,
+                        atrasado,
+                        statusTexto
+                    };
+                });
+
+            } catch (err) {
+                console.error(err);
+                this.erro = err.message || 'Erro ao carregar empréstimos.';
+            } finally {
+                this.carregando = false;
+            }
+        },
+
+        async devolverEmprestimo(emp) {
+            if (!confirm(`Confirmar devolução do livro "${emp.livro_titulo}"?`)) {
+                return;
+            }
+
+            this.devolvendoId = emp.id;
+            this.erro = '';
+
+            try {
+                const resp = await fetch('http://127.0.0.1:8000/api/devolver-emprestimo/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ emprestimo_id: emp.id })
+                });
+
+                if (!resp.ok) {
+                    const erro = await resp.json().catch(() => ({}));
+                    throw new Error(erro.detail || 'Erro ao registrar devolução.');
+                }
+
+                alert('Devolução registrada com sucesso!');
+                await this.carregarEmprestimosAtivos();
+                if (this.modalHistoricoAberto) {
+                    await this.carregarHistorico();
+                }
+
+            } catch (err) {
+                console.error(err);
+                this.erro = err.message || 'Erro ao registrar devolução.';
+            } finally {
+                this.devolvendoId = null;
+            }
+        },
+
+        abrirHistorico() {
+            this.modalHistoricoAberto = true;
+            this.carregarHistorico();
+        },
+
+        fecharHistorico() {
+            this.modalHistoricoAberto = false;
+        },
+
+        async carregarHistorico() {
+            if (!this.usuario) return;
+
+            this.carregandoHistorico = true;
+            this.erroHistorico = '';
+            this.historico = [];
+
+            try {
+                // empréstimos do usuário
+                const url = `http://127.0.0.1:8000/api/emprestimos/?usuario=${this.usuario.id}`;
+                const resp = await fetch(url);
+                if (!resp.ok) {
+                    throw new Error('Não foi possível carregar o histórico.');
+                }
+
+                const dados = await resp.json();
+                const lista = Array.isArray(dados) ? dados : (dados.results || []);
+
+                this.historico = lista
+                    .filter(e => e.data_devolucao_real)
+                    .map(e => {
+                        let statusTexto = 'Devolvido';
+                        if (e.status === 'FECHADO') {
+                            statusTexto = 'Devolvido';
+                        } else if (e.status) {
+                            statusTexto = e.status;
+                        }
+                        return {
+                            ...e,
+                            statusTexto
+                        };
+                    });
+
+            } catch (err) {
+                console.error(err);
+                this.erroHistorico = err.message || 'Erro ao carregar o histórico.';
+            } finally {
+                this.carregandoHistorico = false;
+            }
+        }
+    },
+    mounted() {
+        const dados = localStorage.getItem('usuarioLogado');
+        if (!dados) {
+            alert('Você precisa estar logado para ver seus empréstimos.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        this.usuario = JSON.parse(dados);
+        this.carregarEmprestimosAtivos();
+    }
+}).mount('#app');
+</script>
+
+<script>
+function atualizarSaudacao() {
+    const spanSaudacao = document.getElementById('saudacao-usuario');
+    const linkEntrar   = document.getElementById('link-entrar');
+    const linkSair     = document.getElementById('link-sair');
+
+    const dados = localStorage.getItem('usuarioLogado');
+
+    if (dados) {
+        const usuario = JSON.parse(dados);
+        if (spanSaudacao) {
+            spanSaudacao.textContent = 'Bem-vindo, ' + (usuario.nome || usuario.matricula) + '!';
+        }
+        if (linkEntrar) linkEntrar.style.display = 'none';
+        if (linkSair)   linkSair.style.display   = 'inline-block';
+    } else {
+        if (spanSaudacao) spanSaudacao.textContent = '';
+        if (linkEntrar)   linkEntrar.style.display = 'inline-block';
+        if (linkSair)     linkSair.style.display   = 'none';
+    }
+}
+
+function sair() {
+    localStorage.removeItem('usuarioLogado');
+    atualizarSaudacao();
+    window.location.href = 'login.html';
+}
+
+atualizarSaudacao();
+</script>
+
+</body>
+</html>
