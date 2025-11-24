@@ -67,10 +67,13 @@ O script dados_teste.py cria automaticamente:
 
 Para executar o script:
 
-1º Certifique-se de estar na pasta backend
-2º Ative o ambiente virtual
-3º Abra o shell do Django (python manage.py shell)
-4º Execute:
+1º Certifique-se de estar na pasta backend  
+
+2º Ative o ambiente virtual  
+
+3º Abra o shell do Django (python manage.py shell)  
+
+4º Execute:  
  - exec(open("scripts/dados_teste.py", encoding="utf-8").read())
  - quit()
 
