@@ -77,14 +77,22 @@ Para executar o script:
  - exec(open("scripts/dados_teste.py", encoding="utf-8").read())
  - quit()
 
-Usuários de Teste Criados Automaticamente
-Alunos:
-Matrícula	Senha	    Nome
-1001	    senha123	Ana Souza
-1002	    senha456	Bruno Oliveira
+Usuários de Teste Criados Automaticamente  
+
+Alunos:  
+
+Matrícula	Senha	    Nome  
+
+1001	    senha123	Ana Souza  
+
+1002	    senha456	Bruno Oliveira  
+
 1003	    senha789	Carla Pereira
 
-Funcionários:
-Matrícula	Senha	    Nome
-2001	    func12345	Daniel Costa
+Funcionários:  
+
+Matrícula	Senha	    Nome  
+
+2001	    func12345	Daniel Costa  
+
 2002	    func54321	Fernanda Lima
